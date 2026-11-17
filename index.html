@@ -85,6 +85,24 @@
 
 </div>
 </div></section>
+
+<section class="section products-section" id="featured">
+ <div class="wrap">
+  <div class="section-head reveal">
+   <div><span class="kicker">A little inspiration</span><h2>Explore the sample edit.</h2></div>
+   <p>Browse a small selection of demonstration products. Confirm current stock and prices with the pharmacy.</p>
+  </div>
+  <div class="tabs reveal" id="tabs" role="group" aria-label="Filter sample products">
+   <button class="tab active" type="button" data-filter="All">All</button>
+   <button class="tab" type="button" data-filter="Baby & Mom">Baby & Mom</button>
+   <button class="tab" type="button" data-filter="Skincare">Skincare</button>
+   <button class="tab" type="button" data-filter="Personal Care">Personal Care</button>
+   <button class="tab" type="button" data-filter="Wellness">Wellness</button>
+  </div>
+  <div class="product-grid" id="productGrid" aria-live="polite" style="margin-top:22px"></div>
+  <p class="demo-note">Demonstration catalogue only · Products, imagery and prices are illustrative and not confirmed pharmacy inventory.</p>
+ </div>
+</section>
 <section class="section" id="about"><div class="wrap"><div class="section-head reveal"><div><span class="kicker">The Healtheezz difference</span><h2>Care in the little things.</h2></div><p>A neighbourhood pharmacy experience built around making everyday wellbeing feel easier and more accessible.</p></div><div class="service-grid"><article class="service reveal"><div class="service-icon">♡</div><h3>Personal attention</h3><p>A friendly pharmacy experience where your questions and everyday needs matter.</p></article><article class="service reveal"><div class="service-icon">✦</div><h3>Everyday essentials</h3><p>Explore a range of pharmacy, personal care and wellness categories in one convenient place.</p></article><article class="service reveal"><div class="service-icon">⌖</div><h3>Find us in Bulawayo</h3><p>Visit us at Shop 3, MFZ Complex, 53 Fife Street, near 4th Avenue.</p></article></div></div></section>
 <section class="contact-band" id="contact"><div class="wrap contact-inner"><div><h2>We're here for your everyday.</h2><p>Have a question about a product or need directions? Get in touch with the pharmacy.</p></div><div class="contact-actions"><a class="cta primary" href="tel:+263722803184">Call the pharmacy ↗</a><a class="cta ghost" href="https://wa.me/263722803184" target="_blank" rel="noopener">WhatsApp us ↗</a></div></div></section>
 </main>
@@ -111,25 +129,25 @@ const products=[
 let activeFilter="All",basketItems={},selectedProduct=null;
 const grid=document.getElementById("productGrid"),toast=document.getElementById("toast"),modal=document.getElementById("modal");
 function money(n){return "$"+n.toFixed(2)}
-function renderProducts(){const q=document.getElementById("search").value.toLowerCase();const shown=products.filter(p=>(activeFilter==="All"||p.category===activeFilter)&&(p.name+" "+p.category).toLowerCase().includes(q));grid.innerHTML=shown.map(p=>`<article class="product-card reveal visible"><div class="product-image"><img loading="lazy" src="${p.img}" alt="${p.name}"><span class="sample-tag">Sample listing</span><button class="quick" aria-label="Quick view ${p.name}" data-quick="${p.id}">↗</button></div><div class="product-info"><span class="product-category">${p.category}</span><h3>${p.name}</h3><p>Illustrative product · confirm stock</p><div class="product-bottom"><span class="price">${money(p.price)}</span><button class="add" aria-label="Add ${p.name} to basket" data-add="${p.id}">+</button></div></div></article>`).join("")||'<p style="grid-column:1/-1;color:#78858c;padding:30px">No sample products match your search.</p>'}
+function renderProducts(){if(!grid)return;const q=(document.getElementById("search")?.value||"").toLowerCase();const shown=products.filter(p=>(activeFilter==="All"||p.category===activeFilter)&&(p.name+" "+p.category).toLowerCase().includes(q));grid.innerHTML=shown.map(p=>`<article class="product-card reveal visible"><div class="product-image"><img loading="lazy" src="${p.img}" alt="${p.name}"><span class="sample-tag">Sample listing</span><button class="quick" aria-label="Quick view ${p.name}" data-quick="${p.id}">↗</button></div><div class="product-info"><span class="product-category">${p.category}</span><h3>${p.name}</h3><p>Illustrative product · confirm stock</p><div class="product-bottom"><span class="price">${money(p.price)}</span><button class="add" aria-label="Add ${p.name} to basket" data-add="${p.id}">+</button></div></div></article>`).join("")||'<p style="grid-column:1/-1;color:#78858c;padding:30px">No sample products match your search.</p>'}
 function basketQuantity(){return Object.values(basketItems).reduce((n,item)=>n+item.qty,0)}
 function addToBasket(id){const p=products.find(x=>x.id===id);if(!p)return;if(!basketItems[id])basketItems[id]={...p,qty:0};basketItems[id].qty++;updateBasket();showToast("Added to basket · "+basketQuantity()+" item"+(basketQuantity()===1?"":"s"))}
 function updateBasket(){const count=basketQuantity();document.getElementById("cartCount").textContent=count;document.getElementById("mobileCount").textContent=count;const items=Object.values(basketItems);document.getElementById("drawerItems").innerHTML=items.length?items.map(p=>`<div class="drawer-item"><img src="${p.img}" alt=""><div><strong>${p.name}</strong><small>Sample listing · ${money(p.price)}</small><div class="qty-control"><button data-qty="-1" data-id="${p.id}">−</button><span>${p.qty}</span><button data-qty="1" data-id="${p.id}">+</button></div></div><button data-remove="${p.id}" aria-label="Remove item" style="border:0;background:none;color:#a55">×</button></div>`).join(""):'<div class="drawer-empty">Your basket is empty. Explore the sample catalogue and add items you would like to enquire about.</div>';const total=items.reduce((n,p)=>n+p.price*p.qty,0);document.getElementById("drawerTotal").textContent=money(total);const message="Hello Healtheezz Pharmacy, I would like to enquire about these sample catalogue items (please confirm actual stock and prices):\\n"+items.map(p=>p.qty+" × "+p.name).join("\\n");document.getElementById("basketEnquiry").href="https://wa.me/263722803184?text="+encodeURIComponent(message);}
 function showToast(msg){toast.textContent=msg;toast.classList.add("show");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>toast.classList.remove("show"),2200)}
 function openQuick(id){selectedProduct=products.find(p=>p.id===id);if(!selectedProduct)return;document.getElementById("modalImage").src=selectedProduct.img;document.getElementById("modalTitle").textContent=selectedProduct.name;document.getElementById("modalPrice").textContent=money(selectedProduct.price);modal.classList.add("open")}
-grid.addEventListener("click",e=>{const add=e.target.closest("[data-add]"),quick=e.target.closest("[data-quick]");if(add)addToBasket(+add.dataset.add);if(quick)openQuick(+quick.dataset.quick)});document.getElementById("drawerItems").addEventListener("click",e=>{const qty=e.target.closest("[data-qty]"),remove=e.target.closest("[data-remove]");if(qty){const id=+qty.dataset.id;if(!basketItems[id])return;basketItems[id].qty+=+qty.dataset.qty;if(basketItems[id].qty<=0)delete basketItems[id];updateBasket()}if(remove){delete basketItems[+remove.dataset.remove];updateBasket()}});
-document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;activeFilter=b.dataset.filter;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));renderProducts()});
+if(grid)grid.addEventListener("click",e=>{const add=e.target.closest("[data-add]"),quick=e.target.closest("[data-quick]");if(add)addToBasket(+add.dataset.add);if(quick)openQuick(+quick.dataset.quick)});document.getElementById("drawerItems").addEventListener("click",e=>{const qty=e.target.closest("[data-qty]"),remove=e.target.closest("[data-remove]");if(qty){const id=+qty.dataset.id;if(!basketItems[id])return;basketItems[id].qty+=+qty.dataset.qty;if(basketItems[id].qty<=0)delete basketItems[id];updateBasket()}if(remove){delete basketItems[+remove.dataset.remove];updateBasket()}});
+const tabs=document.getElementById("tabs");if(tabs)tabs.addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;activeFilter=b.dataset.filter;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));renderProducts()});
 document.querySelectorAll(".category[data-category]").forEach(el=>el.addEventListener("click",()=>{activeFilter=el.dataset.category;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.filter===activeFilter));renderProducts()}));
-document.getElementById("search").addEventListener("input",renderProducts);
+const searchInput=document.getElementById("search");if(searchInput)searchInput.addEventListener("input",renderProducts);
 document.getElementById("modalClose").addEventListener("click",()=>modal.classList.remove("open"));
 modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("open")});
 document.getElementById("modalAdd").addEventListener("click",()=>{if(selectedProduct)addToBasket(selectedProduct.id);modal.classList.remove("open")});
 function openBasket(){document.getElementById("basketDrawer").classList.add("open");document.getElementById("drawerShade").classList.add("open")}function closeBasket(){document.getElementById("basketDrawer").classList.remove("open");document.getElementById("drawerShade").classList.remove("open")}document.getElementById("cartTop").addEventListener("click",openBasket);document.getElementById("drawerClose").addEventListener("click",closeBasket);document.getElementById("drawerShade").addEventListener("click",closeBasket);
 document.getElementById("mobileBasket").addEventListener("click",e=>{e.preventDefault();openBasket()});
 document.getElementById("menuBtn").addEventListener("click",()=>{document.querySelector(".desktop-nav").style.display=document.querySelector(".desktop-nav").style.display==="flex"?"none":"flex";showToast("Use the navigation links to explore")});
-document.getElementById("year").textContent=new Date().getFullYear();
-const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add("visible");observer.unobserve(entry.target)}}),{threshold:.12});document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
-renderProducts();
+const yearNode=document.getElementById("year");if(yearNode)yearNode.textContent=new Date().getFullYear();
+if("IntersectionObserver" in window){const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add("visible");observer.unobserve(entry.target)}}),{threshold:.12});document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));}else{document.querySelectorAll(".reveal").forEach(el=>el.classList.add("visible"));}
+if(grid)renderProducts();
 const track=document.getElementById("campaignTrack"),dots=[...document.querySelectorAll(".campaign-dot")];let slide=0;function showSlide(i){slide=(i+dots.length)%dots.length;track.style.transform=`translateX(-${slide*100}%)`;dots.forEach((d,n)=>d.classList.toggle("active",n===slide))}dots.forEach(d=>d.addEventListener("click",()=>showSlide(+d.dataset.slide)));setInterval(()=>showSlide(slide+1),6500);
 </script>
 </body></html>
